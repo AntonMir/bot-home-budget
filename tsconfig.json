@@ -1,0 +1,11 @@
+{
+    "compilerOptions": {
+        "module": "commonjs",
+        "target": "es5",
+        "sourceMap": true,
+        "outDir": "build",
+        "resolveJsonModule": true
+    },
+    "include": ["index.ts", "src/**/*", "src/**/*.json"],
+    "exclude": ["node_modules"]
+}

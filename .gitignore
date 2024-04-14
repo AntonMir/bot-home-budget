@@ -1,0 +1,10 @@
+.idea
+.vscode
+node_modules
+config/.env
+build
+.DS_Store
+.env.localhost
+.env.stage
+.env.prod
+.env
