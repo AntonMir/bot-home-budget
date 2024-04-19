@@ -8,8 +8,10 @@ export default {
 
    P2P: '<b>---P2P---</b>',
    STORE: `<b>---МАГАЗИНЫ---</b>`,
+   REPLENISH: `<b>---ПОПОЛНЕНИЯ---</b>`,
    P2P_BTN: `P2P`,
    STORE_BTN: `МАГАЗИНЫ`,
+   REPLENISH_BTN: `ПОПОЛНЕНИЯ`,
    BACK_BTN: `Назад`,
    UPLOAD_NEW_EXCEL_FILE_BTN: 'Загрузить новый excel'
 };

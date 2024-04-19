@@ -6,7 +6,6 @@ import { Message, Update } from 'telegraf/types';
 import { Excel } from '../type/excel.type';
 import * as fs from 'fs';
 import {
-    IExcelP2PTransactions,
     IExcelStoreTransactions,
 } from '../interface/excel.interface';
 import { TimeService } from './time.service';
@@ -20,7 +19,10 @@ export class ExcelService {
         this.timeService = new TimeService()
     }
 
-
+    /**
+     * Парсинг .excel в JSON формат
+     * @param ctx
+     */
     async excelToJson(ctx: NarrowedContext<BotContext, {message: (Update.New & Update.NonChannel & Message.AnimationMessage) | (Update.New & Update.NonChannel & Message.DocumentMessage), update_id: number}>): Promise<Excel[]> {
         try {
             // Получите file_id документа
@@ -53,23 +55,27 @@ export class ExcelService {
         }
     }
 
-
+    /**
+     * Сортировка данных по категориям и суммам общий расходов по ним
+     * @param data
+     */
     getAllSortedExcelStoreTransactions(data: Excel[]): IExcelStoreTransactions {
         try {
             const storeList: IExcelStoreTransactions = {}
 
             data.forEach((operation: Excel) => {
                 // Сервисы/Магазины
-                if(operation['Категория'] !== 'Переводы') {
+                if(!['Переводы', 'Пополнения', undefined].includes(operation['Категория'])) {
                     if(!storeList[operation['Категория']]) {
                         storeList[operation['Категория']] = {
                             description: operation['Описание'] || '-',
                             amount: +operation['Сумма операции'].toFixed(2) || 0
                         }
+                    } else {
+                        storeList[operation['Категория']].amount
+                            = +storeList[operation['Категория']].amount.toFixed(2)
+                            + +operation['Сумма операции'].toFixed(2) || 0
                     }
-                    storeList[operation['Категория']].amount
-                        = +storeList[operation['Категория']].amount.toFixed(2)
-                        + +operation['Сумма операции'].toFixed(2) || 0
                 }
             })
 
@@ -80,65 +86,43 @@ export class ExcelService {
     }
 
     /**
-     * P2P
+     * Отфильтрованный по категории excel JSON
      * @param data
+     * @param category
      */
-    getAllSortedExcelP2PTransactions(data: Excel[]): IExcelP2PTransactions[] {
+    getTransactionsFromCategory(data: Excel[], category: string): Excel[] {
         try {
-            const p2pList: IExcelP2PTransactions[] = []
-
-            data.forEach((operation: Excel) => {
-                if(operation['Категория'] === 'Переводы') {
-                    // TODO: убрать кастомные поля на английском языке
-                    p2pList.push({
-                        description: operation['Описание']  || '-',
-                        amount: operation['Сумма операции']  || 0,
-                        cardNum: operation['Номер карты'] || '-',
-                        datePayment: operation['Дата платежа'] || '-'
-                    })
-                }
+            const transactionsList = data.filter(el => {
+                return el['Категория'] === category
             })
 
-            p2pList.sort((a, b) => {
-                const dateA = this.timeService.getDateFromString(a.datePayment); // Получаем дату из строки a
-                const dateB = this.timeService.getDateFromString(b.datePayment); // Получаем дату из строки b
-                return dateA.getTime() - dateB.getTime(); // Сравниваем миллисекунды
-            })
-
-            return p2pList
+            return this.excelSorter(transactionsList)
         } catch(error) {
-            this.logger.error(`getAllSortedExcelP2PTransactions`, error)
+            this.logger.error(`getTransactionsFromCategory`, error)
+            return data
         }
     }
 
     /**
-     * Отфильтрованный excel
+     * Сортировка по дате платежа от меньшего к большему
      * @param data
-     * @param category
      */
-    getFilteredStoreFromCategory(data: Excel[], category: string): Excel[] {
+    excelSorter(data: Excel[]) {
         try {
-            const storeList: Excel[] = []
-
-            data.forEach((operation: Excel) => {
-                if(operation['Категория'] === category) {
-                    storeList.push(operation)
-                }
-            })
-
-            storeList.sort((a, b) => {
+            return data.sort((a, b) => {
                 const dateA = this.timeService.getDateFromString(a['Дата платежа']); // Получаем дату из строки a
                 const dateB = this.timeService.getDateFromString(b['Дата платежа']); // Получаем дату из строки b
                 return dateA.getTime() - dateB.getTime(); // Сравниваем миллисекунды
             })
-
-            return storeList
         } catch(error) {
-            this.logger.error(`getFilteredStoreFromCategory`, error)
+            this.logger.error(`excelSorter`, error)
+            return data
         }
     }
 }
 
+
+// TINKOFF EXAMPLE:
 // {
 //     'Дата операции': '03.04.2024 12:45:51',
 //     'Дата платежа': '03.04.2024',

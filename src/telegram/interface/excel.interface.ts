@@ -15,19 +15,8 @@ export interface ITinkoffExcel {
     'Сумма операции с округлением'?: number; // 2977
 }
 
-// TODO
-// :Excel
-export interface IExcelP2PTransactions {
-    description: string,
-    amount: number,
-    cardNum: string,
-    datePayment: string
-}
-
-// TODO
-// [key: string]: Excel
 export interface IExcelStoreTransactions {
-    [key: string]: {
+    [category: string]: {
         description: string,
         amount: number,
     }
