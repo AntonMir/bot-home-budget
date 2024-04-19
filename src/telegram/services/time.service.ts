@@ -78,4 +78,12 @@ export class TimeService {
     const year = currentDate.getFullYear();
     return `${day}.${month}.${year}`;
   }
+
+  /**
+   *   Функция для преобразования строки с датой в объект Date
+   */
+  getDateFromString(dateString: string) {
+    const [day, month, year] = dateString.split('.').map(Number);
+    return new Date(year, month - 1, day); // Месяцы в объекте Date начинаются с 0
+  };
 }

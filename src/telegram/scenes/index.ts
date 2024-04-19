@@ -6,9 +6,9 @@ import { BotContext } from '../interface/bot-context.interface';
 import { SCENES } from '../enum/scenes-list.enum';
 
 const mainMenuScene = new Scenes.BaseScene<BotContext>(SCENES.MAIN_MENU);
-const initScene = new Scenes.BaseScene<BotContext>(SCENES.INIT);
 const excelScene = new Scenes.BaseScene<BotContext>(SCENES.EXCEL);
 
+mainMenuScene.use(init)
 
 export default (
     bot: Telegraf<BotContext>,
@@ -17,11 +17,10 @@ export default (
 
     stage.scenes = new Map<string, Scenes.BaseScene<BotContext>>([
         [SCENES.MAIN_MENU, mainMenuScene],
-        [SCENES.INIT, initScene],
         [SCENES.EXCEL, excelScene],
     ])
-
-    init(initScene);
     mainMenu(mainMenuScene);
     excel(excelScene)
+
+    bot.use(init)
 };

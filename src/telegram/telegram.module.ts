@@ -5,26 +5,21 @@ import scenes from './scenes';
 import { LocalisationService } from './services/localisation.service';
 import { setLogger, Logger } from '../utils/logger';
 import ConfigService from '../services/config.service';
-import { SCENES } from './enum/scenes-list.enum';
+import { ExcelService } from './services/excel.service';
 
 
 export class TelegramModule {
+    private readonly logger: Logger
     private readonly configService: ConfigService
     private readonly botToken: string
-    private readonly logger: Logger
-    private readonly fileIdService: FileIdService
 
     constructor() {
         this.logger = setLogger({name: TelegramModule.name})
-        this.fileIdService = new FileIdService()
         this.configService = new ConfigService()
         this.botToken = this.configService.get('TELEGRAM__BOT_TOKEN')
     }
 
-
     async startBot() {
-        try {
-
         const bot = new Telegraf<BotContext>(this.botToken);
 
         // ignore chats and channels
@@ -35,15 +30,15 @@ export class TelegramModule {
             await next();
         });
 
-
         // Session
         bot.use(session());
 
-
         // Localisation
         bot.context.loc = new LocalisationService();
-        bot.context.fileId = this.fileIdService;
+        bot.context.fileId = new FileIdService();
 
+        // Excel service
+        bot.context.excel = new ExcelService()
 
         // Configure stage
         let stage = new Scenes.Stage<BotContext>();
@@ -52,12 +47,6 @@ export class TelegramModule {
             console.error(err);
         });
 
-        // bot.start(async ctx => {
-        //     console.log(`bot.start`, bot.start)
-        //     ctx.scene.enter(SCENES.MAIN_MENU)
-        // })
-
-
         // Handlers
         try {
             scenes(bot, stage);
@@ -65,18 +54,6 @@ export class TelegramModule {
             this.logger.error(error);
         }
 
-        bot.start(async ctx => {
-            await ctx.scene.enter(SCENES.INIT)
-        })
-
-
         await bot.launch()
-
-        return bot;
-        } catch(e) {
-            console.log(`e`, e)
-        }
-
     };
-
 }

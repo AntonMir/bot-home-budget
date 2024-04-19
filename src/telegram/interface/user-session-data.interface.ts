@@ -1,4 +1,5 @@
 import { Scenes } from 'telegraf';
+import { Excel } from '../type/excel.type';
 
 export interface UserSessionData extends Scenes.SceneSessionData {
   // ctx.from fields
@@ -10,7 +11,8 @@ export interface UserSessionData extends Scenes.SceneSessionData {
   language_code?: string;
   is_premium?: boolean;
   // user session fields
-
+  excel?: Excel[];
+  isFirstExcelOnLoad?: boolean;
   // bot environment
   messageIds?: number[];
 

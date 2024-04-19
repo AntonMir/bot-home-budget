@@ -1,6 +1,5 @@
 import {config} from 'dotenv-safe';
 config()
-import db from "./db/db.module";
 import { setLogger, Logger } from './utils/logger';
 import { TelegramModule } from './telegram/telegram.module';
 
@@ -9,15 +8,16 @@ import { TelegramModule } from './telegram/telegram.module';
     const logger: Logger = setLogger({name: 'App'})
     const telegramModule = new TelegramModule()
 
+
     try {
 
         // STAGE 1: DB CONNECT
         // Example
-        await db.connect()
-        const client = db.getClient()
-        const result = await client.query('SELECT NOW() as current_time')
-        console.log('Current time in the database:', result.rows[0].current_time);
-        await db.disconnect()
+        // await db.connect()
+        // const client = db.getClient()
+        // const result = await client.query('SELECT NOW() as current_time')
+        // console.log('Current time in the database:', result.rows[0].current_time);
+        // await db.disconnect()
 
         await telegramModule.startBot()
 
